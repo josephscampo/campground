@@ -6,5 +6,6 @@
     tmux
     vim
     htop
+    openssl
   ];
 }

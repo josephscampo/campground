@@ -6,8 +6,10 @@
   services.glances = {
     enable = true;
     openFirewall = true; # Automatically opens the default port (61208)
+    # Open the web server mode automatically
+    extraArgs = [ "-w" ];
   };
-
+  networking.firewall.allowedTCPPorts = [ 61208 ];
   # Optional: Add extra command-line tools to make monitoring even better
   environment.systemPackages = with pkgs; [
     iotop       # Watch disk read/write speeds in real-time
