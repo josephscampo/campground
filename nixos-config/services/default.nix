@@ -3,9 +3,10 @@
 {
   imports = [
     ./service-hub.nix
-    ./netdata.nix
+    # ./netdata.nix
     ./filebrowser.nix
     ./audiobookshelf.nix
-#    ./vikunja.nix
+    ./grafana.nix
+    #    ./vikunja.nix
   ];
 }

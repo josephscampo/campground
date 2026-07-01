@@ -6,12 +6,21 @@
     enable = true;
     # Force Netdata to listen only on localhost for security
     config = {
-      web = {
-        "bind to" = "127.0.0.1:19999";
+      global = {
+        "memory mode" = "ram";
+        "debug log" = "none";
+        "access log" = "none";
+        "error log" = "syslog";
       };
     };
   };
 
+  nixpkgs.config.allowUnfree = true;
+  services.netdata.package = pkgs.netdata.override {
+    withCloudUi = true;
+  };
+  networking.firewall.allowedTCPPorts = [19999];
+  
   # 2. Register to your automated dashboard matrix
   services.campground.hub = [
     {

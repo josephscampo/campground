@@ -9,6 +9,7 @@
         port = lib.mkOption { type = lib.types.int; };
         emoji = lib.mkOption { type = lib.types.str; default = "📦"; };
         description = lib.mkOption { type = lib.types.str; default = ""; };
+        useNativeSubpath = lib.mkOption { type = lib.types.bool; default = false; };
       };
     });
     default = [];
