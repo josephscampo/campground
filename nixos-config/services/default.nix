@@ -4,7 +4,7 @@
   imports = [
     ./service-hub.nix
     # ./netdata.nix
-    ./filebrowser.nix
+    # ./filebrowser.nix
     ./audiobookshelf.nix
     ./grafana.nix
     #    ./vikunja.nix

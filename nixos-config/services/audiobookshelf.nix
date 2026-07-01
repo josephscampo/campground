@@ -16,6 +16,7 @@
       port = 8082;
       emoji = "🎧";
       description = "Stream audiobooks and personal podcasts.";
+      useNativeSubpath = true;
     }
   ];
 }
