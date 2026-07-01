@@ -6,6 +6,6 @@
     ./netdata.nix
     ./filebrowser.nix
     ./audiobookshelf.nix
-    ./vikunja.nix
+#    ./vikunja.nix
   ];
 }
