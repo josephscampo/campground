@@ -8,7 +8,8 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./modules/homelab-apps.nix
+      ./platform     # implicit load of platform/defaults.nix
+      ./applications # implicit load of applications/defaults.nix
     ];
 
   # Bootloader.
