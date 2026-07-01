@@ -1,22 +1,22 @@
 { config, pkgs, ... }:
 
 {
-  # 1. Enable Audiobookshelf
+  # service setup
   services.audiobookshelf = {
     enable = true;
-    host = "127.0.0.1";
-    port = 8082;
+    port = 13378;
   };
 
-  # 2. Register to your automated dashboard matrix
+  # Register to your automated dashboard matrix
   services.campground.hub = [
     {
       name = "Audiobooks";
       path = "audiobooks";
-      port = 8082;
+      port = 13378;
       emoji = "🎧";
       description = "Stream audiobooks and personal podcasts.";
       useNativeSubpath = true;
+      nativeSubpathStyle = "strip";
     }
   ];
 }

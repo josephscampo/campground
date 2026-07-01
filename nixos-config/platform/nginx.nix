@@ -1,33 +1,40 @@
 { config, pkgs, lib, ... }:
 
 let
-  # Reusable subpath template with useNativeSubpath defaulting to false
-  mkSubpath = { path, port, useNativeSubpath ? false, ... }: 
-    if useNativeSubpath then {
-      proxyPass = "http://127.0.0.1:${toString port}/";
-      proxyWebsockets = true;
-      extraConfig = ''
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Ensure websockets stream fluidly for real-time updating frames
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-      '';
-    } else {
-      proxyPass = "http://127.0.0.1:${toString port}/";
-      proxyWebsockets = true;
-      basicAuthFile = "/run/nginx/.htpasswd";
-      extraConfig = ''
-        sub_filter_types text/html text/css application/javascript;
-        sub_filter 'href="/' 'href="/${path}/';
-        sub_filter 'src="/' 'src="/${path}/';
-        sub_filter 'url("/' 'url("/${path}/';
-        sub_filter_once off;
-      '';
-    };
+  # Reusable subpath template for legacy apps that need regex text filters
+  mkLegacySubpath = { path, port, ... }: {
+    proxyPass = "http://127.0.0.1:${toString port}/";
+    proxyWebsockets = true;
+    basicAuthFile = "/run/nginx/.htpasswd";
+    extraConfig = ''
+      sub_filter_types text/html text/css application/javascript;
+      sub_filter 'href="/' 'href="/${path}/';
+      sub_filter 'src="/' 'src="/${path}/';
+      sub_filter 'url("/' 'url("/${path}/';
+      sub_filter_once off;
+    '';
+  };
+
+  # Scalable template for modern apps that handle subpaths natively
+  mkNativeSubpath = { path, port, nativeSubpathStyle ? "passthrough", ... }: {
+    # If style is "strip", add a trailing slash to clear the prefix. 
+    # If "passthrough", omit the slash to pass the path down intact.
+    proxyPass = if nativeSubpathStyle == "strip"
+                then "http://127.0.0.1:${toString port}/"
+                else "http://127.0.0.1:${toString port}";
+                
+    proxyWebsockets = true;
+    extraConfig = ''
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      
+      # Maintain stable websocket tunnels globally
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+    '';
+  };
 
   # Helper function to generate individual HTML cards from the array data
   makeCard = service: ''
@@ -49,21 +56,21 @@ in
     # Dynamically map the location paths and proxy settings
     locations = 
       let
-        # Safely split the matrix using our conditional flag
+        # Split services based on whether they are legacy or native
         partitioned = lib.lists.partition (s: s.useNativeSubpath or false) registeredServices;
-        nativeServices = partitioned.right; # Apps like Grafana
-        legacyServices = partitioned.wrong; # Apps that require raw string modifications
-      in # Transition directly into the value mappings
+        nativeServices = partitioned.right; 
+        legacyServices = partitioned.wrong; 
+      in
         # 1. Apply the brute-force sub_filter template to legacy applications
         (builtins.listToAttrs (map (service: {
           name = "/${service.path}/";
-          value = mkSubpath service;
+          value = mkLegacySubpath service;
         }) legacyServices)) 
 
-        // # 2. Apply the native path-passthrough block to modern modules
+        // # 2. Automatically map ALL native applications using their chosen subpath style
         (builtins.listToAttrs (map (service: {
           name = "/${service.path}/";
-          value = mkSubpath service;
+          value = mkNativeSubpath service;
         }) nativeServices))
         
         // # 3. Dynamically map the helper trailing-slash redirects for ALL services

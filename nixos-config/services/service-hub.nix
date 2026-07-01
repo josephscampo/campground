@@ -10,6 +10,7 @@
         emoji = lib.mkOption { type = lib.types.str; default = "📦"; };
         description = lib.mkOption { type = lib.types.str; default = ""; };
         useNativeSubpath = lib.mkOption { type = lib.types.bool; default = false; };
+        nativeSubpathStyle = lib.mkOption { type = lib.types.str; default = "strip"; };
       };
     });
     default = [];
