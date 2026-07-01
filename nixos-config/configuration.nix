@@ -9,7 +9,7 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./platform     # implicit load of platform/defaults.nix
-      ./applications # implicit load of applications/defaults.nix
+      ./services     # implicit load of services/defaults.nix
     ];
 
   # Bootloader.
