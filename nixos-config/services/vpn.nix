@@ -14,7 +14,7 @@
     address = "127.0.0.1";
     port = 8080;
     settings = {
-      server_url = "https://campground.asuscomm.com:8443";
+      server_url = "https://campgroundlabs.xyz:8443";
       dns = {
         magic_dns = true;
         base_domain = "homelab.net";
@@ -29,7 +29,7 @@
     settings = {
       server = {
         host = "0.0.0.0";
-        base_url = "https://campground.asuscomm.com/vpn-admin"; 
+        base_url = "https://campgroundlabs.xyz/vpn-admin"; 
         cookie_secret_path = "/etc/headplane_cookie.secret";
         port = 3300;
       };

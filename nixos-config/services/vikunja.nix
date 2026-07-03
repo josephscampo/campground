@@ -12,7 +12,7 @@
 
     # MANDATORY options required by the NixOS module schema
     frontendScheme = "https";
-    frontendHostname = "campground.asuscomm.com";
+    frontendHostname = "campgroundlabs.xyz";
     port = 3456;
 
     settings = {
@@ -24,7 +24,7 @@
   };
 
   # 2. Register to your automated dashboard matrix
-  services.campground.hub = [
+  services.campgroundlabs.hub = [
     {
       name = "Tasks & Projects";
       path = "tasks";

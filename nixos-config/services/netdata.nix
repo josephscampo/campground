@@ -22,7 +22,7 @@
   networking.firewall.allowedTCPPorts = [19999];
   
   # 2. Register to your automated dashboard matrix
-  services.campground.hub = [
+  services.campgroundlabs.hub = [
     {
       name = "Server Metrics";
       path = "metrics";

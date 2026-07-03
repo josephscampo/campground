@@ -13,7 +13,7 @@
   };
 
   # 2. Register to your automated dashboard matrix
-  services.campground.hub = [
+  services.campgroundlabs.hub = [
     {
       name = "File Explorer";
       path = "files";

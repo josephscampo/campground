@@ -1,7 +1,7 @@
 { config, lib, ... }:
 
 {
-  options.services.campground.hub = lib.mkOption {
+  options.services.campgroundlabs.hub = lib.mkOption {
     type = lib.types.listOf (lib.types.submodule {
       options = {
         name = lib.mkOption { type = lib.types.str; };

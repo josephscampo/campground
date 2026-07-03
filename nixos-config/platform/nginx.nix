@@ -3,9 +3,10 @@
 {
   services.nginx.enable = true;
 
-  services.nginx.virtualHosts."campground.asuscomm.com" = {
+  services.nginx.virtualHosts."campgroundlabs.asuscomm.com" = {
     enableACME = true;
     forceSSL = true;
+    serverAliases = [ "campgroundlabs.xyz" ];
     listen = [ 
       { addr = "0.0.0.0"; port = 443; ssl = true; }
       { addr = "0.0.0.0"; port = 8443; ssl = true; }
@@ -65,11 +66,11 @@
       # 2. AUDIOBOOKSHELF PROXY
       # =========================================================================
       "/audiobooks" = {
-        return = "301 https://campground.asuscomm.com/audiobooks/";
+        return = "301 https://campgroundlabs.xyz/audiobooks/";
       };
       
       "/audiobookshelf" = {
-        return = "301 https://campground.asuscomm.com/audiobookshelf/";
+        return = "301 https://campgroundlabs.xyz/audiobookshelf/";
       };
 
       "/audiobookshelf/" = {
@@ -90,7 +91,7 @@
       # 3. HEADPLANE DASHBOARD PROXY
       # =========================================================================
       "/vpn-admin" = {
-        return = "301 https://campground.asuscomm.com/vpn-admin/";
+        return = "301 https://campgroundlabs.xyz/vpn-admin/";
       };
 
       "/vpn-admin/" = {
@@ -140,7 +141,8 @@
 
   security.acme = { 
     acceptTerms = true; 
-    defaults.email = "josephscampo@gmail.com"; 
+    defaults.email = "josephscampo@gmail.com";
+    defaults.server = "https://acme-v02.api.letsencrypt.org/directory";
   };
   
   networking.firewall.allowedTCPPorts = [ 80 443 8443 ];
