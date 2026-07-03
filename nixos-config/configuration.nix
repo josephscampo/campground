@@ -99,6 +99,18 @@
   # Install firefox.
   programs.firefox.enable = true;
 
+  # Enable running unpatched dynamic binaries
+  programs.nix-ld.enable = true;
+
+  # Optional: If the VS Code server extensions require specific standard libraries 
+  # (like glib, zlib, libstdc++), you can declare them here:
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc
+    zlib
+    glib
+    # Add any other libraries if complex language extensions throw errors later
+  ];
+  
   # List packages installed in system profile. To search, run:
   # $ nix search wget
     environment.systemPackages = with pkgs; [
