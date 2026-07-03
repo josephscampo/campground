@@ -8,5 +8,6 @@
     ./audiobookshelf.nix
     ./grafana.nix
     #    ./vikunja.nix
+    ./vpn.nix
   ];
 }

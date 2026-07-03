@@ -13,9 +13,13 @@
       # Disable passwords entirely for the main OS over the internet
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
-      PermitRootLogin = "no"; 
+      PermitRootLogin = "prohibit-password"; 
     };
   };
+
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKxyMr1ZpmJoarQI2bIgsa75Ch2mLQh13LP1xzAgorcp"
+  ];
 
   networking.firewall.allowedTCPPorts = [ 22 ];
 

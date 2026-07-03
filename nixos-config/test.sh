@@ -1,3 +1,3 @@
 #!/bin/sh
 
-sudo nixos-rebuild test --flake .
+sudo nixos-rebuild test --flake .#campground-server
