@@ -50,15 +50,15 @@
             </div>
 
             <div class="grid">
-              <a href="/audiobookshelf/" class="card">
+              <a href="https://audiobookshelf.campgroundlabs.xyz/" class="card">
                 <h3>📚 Audiobookshelf</h3>
                 <p>Stream your audiobooks and manage your media library.</p>
               </a>
-              <a href="/metrics/" class="card">
+              <a href="https://grafana.campgroundlabs.xyz/" class="card">
                 <h3>📊 Grafana</h3>
                 <p>View server metrics, dashboards, and alerts.</p>
               </a>
-              <a href="/vpn-admin/" class="card">
+              <a href="https://vpn.campgroundlabs.xyz/" class="card">
                 <h3>🔒 VPN Control</h3>
                 <p>Manage WireGuard mesh nodes and device authorizations.</p>
               </a>
@@ -69,59 +69,80 @@
       };
 
       # =========================================================================
-      # 2. AUDIOBOOKSHELF PROXY
+      # 2. LEGACY PATH REDIRECTS TO SUBDOMAINS
       # =========================================================================
       "/audiobooks" = {
-        return = "301 https://campgroundlabs.xyz/audiobooks/";
+        return = "301 https://audiobookshelf.campgroundlabs.xyz/";
       };
       
       "/audiobookshelf" = {
-        return = "301 https://campgroundlabs.xyz/audiobookshelf/";
+        return = "301 https://audiobookshelf.campgroundlabs.xyz/";
       };
 
       "/audiobookshelf/" = {
-        proxyPass = "http://127.0.0.1:13378/audiobookshelf/";
-        proxyWebsockets = true;
-        extraConfig = ''
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          proxy_set_header X-Forwarded-Host $host;
-          proxy_set_header X-Forwarded-Port $server_port;
-          proxy_buffering off;
-        '';
+        return = "301 https://audiobookshelf.campgroundlabs.xyz/";
       };
 
-      # =========================================================================
-      # 3. HEADPLANE DASHBOARD PROXY
-      # =========================================================================
       "/vpn-admin" = {
-        return = "301 https://campgroundlabs.xyz/vpn-admin/";
+        return = "301 https://vpn.campgroundlabs.xyz/";
       };
 
       "/vpn-admin/" = {
-        proxyPass = "http://127.0.0.1:3300/admin/"; 
-        proxyWebsockets = true;
-        extraConfig = ''
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
-          proxy_read_timeout 86400;
-          proxy_redirect /admin/ /vpn-admin/;
-          proxy_cookie_path /admin/ /vpn-admin/;
-        '';
+        return = "301 https://vpn.campgroundlabs.xyz/";
       };
 
-      # =========================================================================
-      # 4. GRAFANA METRICS PROXY
-      # =========================================================================
+      "/metrics" = {
+        return = "301 https://grafana.campgroundlabs.xyz/";
+      };
+
       "/metrics/" = {
-        proxyPass = "http://127.0.0.1:3000"; 
+        return = "301 https://grafana.campgroundlabs.xyz/";
+      };
+    };
+  };
+
+  services.nginx.virtualHosts."audiobookshelf.campgroundlabs.xyz" = {
+    useACMEHost = "campgroundlabs.xyz";
+    forceSSL = true;
+    listen = [ { addr = "0.0.0.0"; port = 443; ssl = true; } ];
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:13378/";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+      '';
+    };
+  };
+
+  services.nginx.virtualHosts."grafana.campgroundlabs.xyz" = {
+    useACMEHost = "campgroundlabs.xyz";
+    forceSSL = true;
+    listen = [ { addr = "0.0.0.0"; port = 443; ssl = true; } ];
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:3000/";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400;
+      '';
+    };
+  };
+
+  services.nginx.virtualHosts."vpn.campgroundlabs.xyz" = {
+    useACMEHost = "campgroundlabs.xyz";
+    forceSSL = true;
+    listen = [ { addr = "0.0.0.0"; port = 443; ssl = true; } ];
+    locations = {
+      # This catches all Tailscale client traffic and pipes it to Headscale.
+      "~ ^/(apple|register|key|ts2019|machine|node|oidc|metrics|windows)" = {
+        proxyPass = "http://127.0.0.1:8080$request_uri";
         proxyWebsockets = true;
         extraConfig = ''
           proxy_set_header Host $host;
@@ -134,6 +155,21 @@
           proxy_read_timeout 86400;
         '';
       };
+      "/" = {
+        proxyPass = "http://127.0.0.1:3300/";
+        proxyWebsockets = true;
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Forwarded-Prefix /;
+          proxy_redirect off;
+          proxy_buffering off;
+          proxy_read_timeout 86400;
+        '';
+      };
+      
     };
   };
 

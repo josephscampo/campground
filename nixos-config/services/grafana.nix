@@ -23,8 +23,8 @@
       server = {
         http_addr = "0.0.0.0";
         http_port = 3000;
-        root_url = "https://campgroundlabs.xyz/metrics";
-        serve_from_sub_path = true;
+        root_url = "https://grafana.campgroundlabs.xyz";
+        serve_from_sub_path = false;
       };
       
       # 1. ALLOW ANONYMOUS PASS-THROUGH (No Login Required)
