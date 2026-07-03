@@ -5,5 +5,6 @@
   imports = [
     ./core-packages.nix
     ./nginx.nix
+    ./power.nix
   ];
 }
