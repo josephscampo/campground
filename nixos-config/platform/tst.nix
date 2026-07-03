@@ -114,9 +114,18 @@ in
     chmod 600 /run/nginx/.htpasswd
   '';
 
-  security.acme = { 
-    acceptTerms = true; 
-    defaults.email = "josephscampo@gmail.com";
-    defaults.server = "https://acme-v02.api.letsencrypt.org/directory";
+  users.users.nginx.extraGroups = [ "acme" ];
+  security.acme = {
+    acceptTerms = true;
+    defaults = {
+      email = "josephscampo@gmail.com";
+      dnsProvider = "porkbun";
+      environmentFile = "/etc/porkbun-api.secret";
+    };
+    
+    # Tell ACME to fetch a wildcard cert covering everything
+    certs."campgroundlabs.xyz" = {
+      extraDomainNames = [ "*.campgroundlabs.xyz" ];
+    };
   };
 }
