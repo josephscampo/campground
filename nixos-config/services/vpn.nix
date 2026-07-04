@@ -1,43 +1,50 @@
 { config, pkgs, ... }:
 
 {
-
-  # Allow the server to pass packets between devices (required for Exit Nodes/routing)
-  boot.kernel.sysctl = {
-    "net.ipv4.ip_forward" = 1;
-    "net.ipv6.conf.all.forwarding" = 1;
-  };
-
-  # Headscale configuration
-  services.headscale = {
+  environment.systemPackages = with pkgs; [ wireguard-tools ];
+ 
+  networking.nat = {
     enable = true;
-    address = "127.0.0.1";
-    port = 8080;
-    settings = {
-      # Change this to point to your new subdomain:
-      server_url = "https://vpn.campgroundlabs.xyz";
-      dns = {
-        magic_dns = true;
-        base_domain = "vpnet.campgroundlabs.xyz";
-        nameservers = { global = [ "1.1.1.1" ]; };
-      };
-      wireguard = { listen_port = 41641; };
-    };
+    enableIPv6 = true;
+    externalInterface = "eno1";
+    internalInterfaces = [ "wg0" ];
+  };
+  
+  # Open ports in the firewall
+  networking.firewall = {
+    allowedTCPPorts = [ 53 ];
+    allowedUDPPorts = [ 53 51820 ];
   };
 
-  services.headplane = {
-    enable = true;
-    settings = {
-      server = {
-        host = "0.0.0.0";
-        base_url = "https://vpn.campgroundlabs.xyz"; 
-        cookie_secret_path = "/etc/headplane_cookie.secret";
-        port = 3300;
-      };
-      headscale = {
-        url = "http://127.0.0.1:8080";
-        config_path = "/etc/headscale/config.yaml"; 
-      };
+  networking.wg-quick.interfaces = {
+    # "wg0" is the network interface name. You can name the interface arbitrarily.
+    wg0 = {
+      # Determines the IP/IPv6 address and subnet of the client's end of the tunnel interface
+      address = [ "10.0.0.1/24" "fdc9:281f:04d7:9ee9::1/64" ];
+      # The port that WireGuard listens to - recommended that this be changed from default
+      listenPort = 51820;
+      # Path to the server's private key
+      privateKeyFile = "/etc/wireguard-privatekey.secret";
+
+      # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
+      postUp = ''
+        ${pkgs.iptables}/bin/iptables -A FORWARD -i wg0 -j ACCEPT
+        ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -s 10.0.0.1/24 -o eth0 -j MASQUERADE
+        ${pkgs.iptables}/bin/ip6tables -A FORWARD -i wg0 -j ACCEPT
+        ${pkgs.iptables}/bin/ip6tables -t nat -A POSTROUTING -s fdc9:281f:04d7:9ee9::1/64 -o eth0 -j MASQUERADE
+      '';
+
+      # Undo the above
+      preDown = ''
+        ${pkgs.iptables}/bin/iptables -D FORWARD -i wg0 -j ACCEPT
+        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.0.0.1/24 -o eth0 -j MASQUERADE
+        ${pkgs.iptables}/bin/ip6tables -D FORWARD -i wg0 -j ACCEPT
+        ${pkgs.iptables}/bin/ip6tables -t nat -D POSTROUTING -s fdc9:281f:04d7:9ee9::1/64 -o eth0 -j MASQUERADE
+      '';
+
+      peers = [
+        # peers can be added here
+      ];
     };
-  };
+
 }

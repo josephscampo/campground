@@ -45,8 +45,8 @@
           </head>
           <body>
             <div style="max-width: 900px; margin: 0 auto; text-align: center; padding: 0 15px;">
-              <h1 style="font-size: 2.5rem; margin-bottom: 5px;">⛺ Campground Server</h1>
-              <p style="color: #aaa; margin-top: 0; margin-bottom: 40px;">Homelab Control Panel:</p>
+              <h1 style="font-size: 2.5rem; margin-bottom: 5px;">⛺ Campground Server ⛺</h1>
+              <p style="color: #aaa; margin-top: 0; margin-bottom: 40px;">Homelab Control Panel</p>
             </div>
 
             <div class="grid">
