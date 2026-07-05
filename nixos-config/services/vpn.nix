@@ -12,34 +12,32 @@
   
   # Open ports in the firewall
   networking.firewall = {
-    allowedTCPPorts = [ 53 ];
-    allowedUDPPorts = [ 53 443 ];
+    allowedTCPPorts = [ ]; # Dropped 53 here so you aren't an open resolver on eno1
+    allowedUDPPorts = [ 51820 ]; # Only open WireGuard globally
+    
+    # Trust the WireGuard interface completely so clients can access DNS (dnsmasq)
+    trustedInterfaces = [ "wg0" ];
   };
 
   networking.wg-quick.interfaces = {
-    # "wg0" is the network interface name. You can name the interface arbitrarily.
     wg0 = {
-      # Determines the IP/IPv6 address and subnet of the client's end of the tunnel interface
       address = [ "10.0.0.1/24" "fdc9:281f:04d7:9ee9::1/64" ];
-      # The port that WireGuard listens to - recommended that this be changed from default
-      listenPort = 443;
-      # Path to the server's private key
+      listenPort = 51820;
       privateKeyFile = "/etc/wireguard-privatekey.secret";
 
-      # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
+      # Changed -s flags to use proper network base addresses
       postUp = ''
         ${pkgs.iptables}/bin/iptables -A FORWARD -i wg0 -j ACCEPT
-        ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -s 10.0.0.1/24 -o eno1 -j MASQUERADE
+        ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o eno1 -j MASQUERADE
         ${pkgs.iptables}/bin/ip6tables -A FORWARD -i wg0 -j ACCEPT
-        ${pkgs.iptables}/bin/ip6tables -t nat -A POSTROUTING -s fdc9:281f:04d7:9ee9::1/64 -o eno1 -j MASQUERADE
+        ${pkgs.iptables}/bin/ip6tables -t nat -A POSTROUTING -s fdc9:281f:04d7:9ee9::/64 -o eno1 -j MASQUERADE
       '';
 
-      # Undo the above
       preDown = ''
         ${pkgs.iptables}/bin/iptables -D FORWARD -i wg0 -j ACCEPT
-        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.0.0.1/24 -o eno1  -j MASQUERADE
+        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.0.0.0/24 -o eno1 -j MASQUERADE
         ${pkgs.iptables}/bin/ip6tables -D FORWARD -i wg0 -j ACCEPT
-        ${pkgs.iptables}/bin/ip6tables -t nat -D POSTROUTING -s fdc9:281f:04d7:9ee9::1/64 -o eno1 -j MASQUERADE
+        ${pkgs.iptables}/bin/ip6tables -t nat -D POSTROUTING -s fdc9:281f:04d7:9ee9::/64 -o eno1 -j MASQUERADE
       '';
 
       peers = [
@@ -50,22 +48,35 @@
       ];
     };
   };
-
-  # Configure DNS on client
+  
   services = {
     dnsmasq = {
       enable = true;
       settings = {
         interface = "wg0";
+        bind-interfaces = true; 
       };
     };
   };
 
+  # Force dnsmasq to wait for the WireGuard interface to exist
+  systemd.services.dnsmasq = {
+    after = [ "wireguard-wg0.service" "network-online.target" ];
+    wants = [ "wireguard-wg0.service" ];
+  };
+
+  # The missing link: Explicitly turn on packet forwarding in the kernel
   boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = 1;
+    "net.ipv6.conf.all.forwarding" = 1;
+    "net.ipv6.conf.default.forwarding" = 1;
+
+    # Keep your existing adjustments
     "net.ipv4.conf.all.rp_filter" = 0;
     "net.ipv4.conf.default.rp_filter" = 0;
-    # For IPv6, we want to ensure the system allows asymmetric routing paths
     "net.ipv6.conf.all.disable_ipv6" = 0;
     "net.ipv6.conf.default.disable_ipv6" = 0;
   };
+
+  
 }
