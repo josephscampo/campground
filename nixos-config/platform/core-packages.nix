@@ -9,6 +9,7 @@
     vim
     htop
     openssl
+    tcpdump
   ];
   
   # Enable running unpatched dynamic binaries, needed for vscode integration
