@@ -10,5 +10,6 @@
     #    ./vikunja.nix
     ./vpn.nix
     ./hooks.nix
+    ./jupyter.nix
   ];
 }
