@@ -13,13 +13,7 @@ in
   # =========================================================================
   # VIRTUAL HOSTS CONFIGURATION
   # =========================================================================
-  services.nginx.virtualHosts = lib.mapAttrs (name: vhost: 
-    # Merge basic auth globally across all virtual hosts safely
-    lib.recursiveUpdate vhost {
-      # This applies basic auth to the root of every virtual host by default
-      locations."/".basicAuthFile = authFile;
-    }
-  ) {
+  services.nginx.virtualHosts = {
     "campgroundlabs.xyz" = {
       useACMEHost = "campgroundlabs.xyz";
       forceSSL = true;
@@ -32,6 +26,7 @@ in
 
       locations = {
         "/" = {
+          basicAuthFile = authFile; 
           extraConfig = ''
             if ($server_port = 8443) {
               proxy_pass http://127.0.0.1:8080;
@@ -81,8 +76,14 @@ in
     "audiobookshelf.campgroundlabs.xyz" = {
       useACMEHost = "campgroundlabs.xyz";
       forceSSL = true;
+      # Add this line to allow large audiobook uploads (e.g., up to 1 Gigabyte)
+      extraConfig = ''
+        client_max_body_size 5G;
+      '';
       listen = [ { addr = "0.0.0.0"; port = 443; ssl = true; } ];
+      basicAuthFile = null;
       locations."/" = {
+        basicAuthFile = null;
         proxyPass = "http://127.0.0.1:13378/";
         proxyWebsockets = true;
         extraConfig = ''
@@ -100,6 +101,7 @@ in
       forceSSL = true;
       listen = [ { addr = "0.0.0.0"; port = 443; ssl = true; } ];
       locations."/" = {
+        basicAuthFile = authFile; 
         proxyPass = "http://127.0.0.1:3000/";
         proxyWebsockets = true;
         extraConfig = ''
@@ -114,6 +116,7 @@ in
 
     "jupyter.campgroundlabs.xyz" = {
       useACMEHost = "campgroundlabs.xyz";
+      basicAuthFile = authFile; 
       forceSSL = true;
       listen = [ { addr = "0.0.0.0"; port = 443; ssl = true; } ];
       locations."/" = {
