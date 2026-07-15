@@ -14,7 +14,14 @@
 
   nixpkgs.config.allowUnfree = true;
   networking.hostName = "campground-lodge"; 
+  
+  # Enable the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
+  # Explicitly disable GRUB so it stops complaining about missing devices
+  boot.loader.grub.enable = false;
+  
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # This value determines the NixOS release from which the default
