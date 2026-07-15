@@ -1,3 +1,3 @@
 #!/bin/sh
 
-sudo nixos-rebuild switch --flake .#campground-server
+sudo nixos-rebuild switch --flake .#campground-yurt

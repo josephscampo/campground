@@ -5,7 +5,6 @@
   imports = [
     ./accounts.nix
     ./basic.nix
-    ./bootloader.nix
     ./core-packages.nix
     ./network.nix
     ./nginx.nix
