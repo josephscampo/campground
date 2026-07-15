@@ -13,7 +13,7 @@
     ];
 
   nixpkgs.config.allowUnfree = true;
-  networking.hostName = "yurt"; 
+  networking.hostName = "campground-yurt"; 
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

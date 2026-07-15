@@ -9,12 +9,21 @@
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations = {
-      yurt = nixpkgs.lib.nixosSystem {
+      
+      campground-yurt = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          ./hosts/yurt/configuration.nix
+          ./hosts/campground-yurt/configuration.nix
         ];
-      };
+      },
+
+      campground-lodge = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/campground-lodge/configuration.nix
+        ];
+      }
+
     };
   };
 }
