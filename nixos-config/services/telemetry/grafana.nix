@@ -1,21 +1,8 @@
 { config, pkgs, lib, ... }:
 
 {
-  # 1. Prometheus Metrics Harvester
-  services.prometheus = {
-    enable = true;
-    port = 9090;
-    exporters.node = {
-      enable = true;
-      port = 9100;
-    };
-    scrapeConfigs = [{
-      job_name = "campground-server";
-      static_configs = [{ targets = [ "127.0.0.1:9100" ]; }];
-    }];
-  };
 
-  # 2. Fully Provisioned Grafana Service
+  # Fully Provisioned Grafana Service
   services.grafana = {
     enable = true;
 
@@ -27,20 +14,19 @@
         serve_from_sub_path = false;
       };
       
-      # 1. ALLOW ANONYMOUS PASS-THROUGH (No Login Required)
+      # ALLOW ANONYMOUS PASS-THROUGH (No Login Required)
       "auth.anonymous" = {
         enabled = true;
         org_name = "Main Org."; # Must match your default organization name
         org_role = "Viewer";    # Safe default: lets them see but not break dashboards
       };
 
-      # 2. FORCE HOMEPAGE REDIRECT
       # Points directly to the UID of the automatically downloaded node-exporter dashboard
       dashboards = {
         default_home_dashboard_path = "/var/lib/grafana/dashboards/node-exporter.json";
       };
       
-      # THE APPLIED FIX: Satisfies the module's strict assertion constraint directly
+      # Satisfies the module's strict assertion constraint directly
       security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
     };
 
@@ -55,6 +41,7 @@
           isDefault = true;
         }
       ];
+
       dashboards.settings.providers = [
         {
           name = "Automated Dashboards";
@@ -75,7 +62,7 @@
   networking.firewall.allowedTCPPorts = [3000];
 
 
-  # 3. Clean, raw download of the dashboard layout file
+  # Clean, raw download of the dashboard layout file
   systemd.services.grafana-import-dashboards = {
     description = "Pre-download community dashboard 1860 for Grafana";
     after = [ "network-online.target" ];
@@ -97,15 +84,4 @@
     };
   };
 
-  # 4. Register to your automated dashboard matrix
-  services.campgroundlabs.hub = [
-    {
-      name = "Server Metrics";
-      path = "metrics";
-      port = 3000;
-      emoji = "📊";
-      description = "Production-grade performance analytics.";
-      useNativeSubpath = true;
-    }
-  ];
 }

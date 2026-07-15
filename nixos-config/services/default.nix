@@ -6,8 +6,7 @@
     # ./netdata.nix
     # ./filebrowser.nix
     ./audiobookshelf.nix
-    ./grafana.nix
-    #    ./vikunja.nix
+    ./telemetry
     ./vpn.nix
     ./hooks.nix
     ./jupyter.nix

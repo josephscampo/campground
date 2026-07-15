@@ -8,11 +8,12 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./platform     # implicit load of platform/defaults.nix
-      ./services     # implicit load of services/defaults.nix
+      ../../platform     # implicit load of platform/defaults.nix
+      ../../services     # implicit load of services/defaults.nix
     ];
 
   nixpkgs.config.allowUnfree = true;
+  networking.hostName = "yurt"; 
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

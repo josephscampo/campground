@@ -1,13 +1,12 @@
 { config, pkgs, ... }:
 
 {
-  networking.hostName = "campground-server"; 
-
   # Enable networking
   networking.networkmanager.enable = true;
 
   services.openssh = {
     enable = true;
+    openFirewall = true;
     ports = [ 22 ];
     settings = {
       # Disable passwords entirely for the main OS over the internet
@@ -17,11 +16,12 @@
     };
   };
 
+  services.avahi.enable = true;
+  networking.firewall.allowedUDPPorts = [ 5353 ];
+  
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKxyMr1ZpmJoarQI2bIgsa75Ch2mLQh13LP1xzAgorcp"
   ];
-
-  networking.firewall.allowedTCPPorts = [ 22 ];
 
   # ipv6 dns
   # Automatically update DuckDNS securely
